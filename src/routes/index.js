@@ -2,6 +2,7 @@
 const app = require('express')()
 const cors = require('cors')
 const bodyParser = require('body-parser')
+const { GetStickers} = require('./function/assets')
 const { Register, Login, GetUserByToken, ChangeUserData } = require('./function/user')
 const { CreateJourney, GetJourneys, deleteJourneyByID } = require('./function/journey')
 const { GetCharacters, CreateCharacter, UpdateCharacter ,DeleteCharacter } = require('./function/character')
