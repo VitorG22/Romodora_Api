@@ -1,0 +1,68 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String    @id @unique @default(uuid())
+  name         String
+  email        String    @unique
+  password     String
+  token        String?   @unique
+  token_expire DateTime?
+  picture      String?
+  party        String?
+
+  journey_owner   Journey[]   @relation("journey_owner")
+  character_owner Character[] @relation("character_owner")
+}
+
+model Journey {
+  id     String @id @unique @default(uuid())
+  name   String
+  owner  String
+  banner String
+
+  journey_owner User @relation("journey_owner", fields: [owner], references: [id])
+
+  party_journey PartysOn? @relation("party_journey")
+}
+
+model PartysOn {
+  id         String @id @unique @default(uuid())
+  journey_id String @unique
+  host_id    String @unique
+
+  party_journey Journey? @relation("party_journey", fields: [journey_id], references: [id])
+}
+
+model Character {
+  id           String  @id @unique @default(uuid())
+  name         String
+  picture      String
+  owner        String
+  health       String
+  class        String
+  subClass     String?
+  race         String
+  subRace      String?
+  bag          String?
+  strength     String
+  dexterity    String
+  constitution String
+  intelligence String
+  wisdom       String
+  charisma     String
+
+  character_owner User? @relation("character_owner", fields: [owner], references: [id])
+}
