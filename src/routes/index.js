@@ -73,4 +73,8 @@ app.post('/deleteJourney', async(req,res)=>{
     return res.json(result)
 })
 
+app.get('/getStickers', async(req,res)=>{
+    return res.json(await GetStickers())
+})
+
 module.exports.app = app 
