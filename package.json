@@ -10,7 +10,8 @@
     "socket.io": "^4.8.1"
   },
   "scripts": {
-    "start": "nodemon src/socket/index.js"
+    "start": "nodemon src/socket/index.js",
+    "vercel-build":"npx prisma migrate deploy"
   },
   "devDependencies": {
     "prisma": "^5.22.0"
