@@ -41,6 +41,12 @@ async function initParty(body, socket, callback){
         return
     }
     
+    
+    const randomHexColorCode = () => {
+        let n = (Math.random() * 0xfffff * 1000000).toString(16);
+        return '#' + n.slice(0, 6);
+    }
+    userData.color = randomHexColorCode()
     socket.data.partyData ={
         partyCode:party.id,
         hostId: userData.id,
@@ -109,6 +115,14 @@ async function setPlayer({partyData, data}, callback){
                 id: data.userId
             }
         })
+
+        const randomHexColorCode = () => {
+            let n = (Math.random() * 0xfffff * 1000000).toString(16);
+            return '#' + n.slice(0, 6);
+        }
+
+
+        res.color = randomHexColorCode()
         partyData.players.push({
             ...res,
             characterData:{},
