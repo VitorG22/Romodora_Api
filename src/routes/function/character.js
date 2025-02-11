@@ -27,11 +27,11 @@ function concatHealth(healthData) {
 function disconcateHealth(healthString) {
     const valuesArray = healthString.split('/')
     let health = {
-        maxHealthTotal: valuesArray[0],
-        maxHealthBase: valuesArray[1],
-        maxHealthBonus: valuesArray[2],
-        currentHealth: valuesArray[3],
-        currentHealthBonus: valuesArray[4]
+        maxHealthTotal: parseInt(valuesArray[0]),
+        maxHealthBase: parseInt(valuesArray[1]),
+        maxHealthBonus: parseInt(valuesArray[2]),
+        currentHealth: parseInt(valuesArray[3]),
+        currentHealthBonus: parseInt(valuesArray[4])
     }
     return health
 }
