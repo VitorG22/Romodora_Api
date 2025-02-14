@@ -10,8 +10,10 @@
     "socket.io": "^4.8.1"
   },
   "scripts": {
+    "run-all": "npm-run-all  build start --sequential",
     "start": "node src/socket/index.js",
-    "dev": "nodemon src/socket/index.js"
+    "dev": "nodemon src/socket/index.js",
+    "build": "npx prisma migrate deploy"
 
   },
   "devDependencies": {
