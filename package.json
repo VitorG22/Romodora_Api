@@ -12,10 +12,10 @@
     "socket.io": "^4.8.1"
   },
   "scripts": {
-    "deploy": "npm install & npm run build & npm run start",
+    "deploy": "npm run build & npm run start",
     "start": "node src/socket/index.js",
     "dev": "nodemon src/socket/index.js",
-    "build": "npx prisma migrate deploy"
+    "build": "npm install & npx prisma migrate deploy"
   },
   "devDependencies": {
     "prisma": "^5.22.0"
