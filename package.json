@@ -7,14 +7,14 @@
     "dotenv": "^16.4.5",
     "express": "^4.21.1",
     "nodemon": "^3.1.7",
+    "npm-run-all": "^4.1.5",
     "socket.io": "^4.8.1"
   },
   "scripts": {
-    "run-all": "npm-run-all  build start --sequential",
+    "deploy": "npm run build & npm run start",
     "start": "node src/socket/index.js",
     "dev": "nodemon src/socket/index.js",
     "build": "npx prisma migrate deploy"
-
   },
   "devDependencies": {
     "prisma": "^5.22.0"
