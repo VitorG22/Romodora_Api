@@ -1,6 +1,8 @@
 const { createHash } = require('crypto')
 const { PrismaClient } = require('@prisma/client')
 const prisma = new PrismaClient()
+const nodemailer = require('nodemailer')
+require('dotenv').config()
 
 function hashPassword(password) {
     const hashedPassword = createHash('sha256').update(password).digest('hex')
@@ -93,36 +95,95 @@ async function Register({ name, email, password }) {
 }
 
 async function GetResetPasswordCode({ email }) {
-    function GenerateRandomCode(codeLength){
-        const characters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z','1', '2', '3', '4', '5', '6', '7', '8', '9', '0']
+    function GenerateRandomCode(codeLength) {
+        const characters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0']
         let randomString = ''
-    
+
         for (i = 0; i < codeLength; i++) {
             var randomCharacter = characters[Math.floor(Math.random() * characters.length)]
             randomString += randomCharacter
         }
-    
+
         return randomString
     }
-    
-    
+
+    var transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+            user: process.env.EMAIL,
+            pass: process.env.EMAILPASSWORD
+        }
+    })
+    console.log(process.env.EMAIL)
+    console.log(process.env.EMAILPASSWORD)
+
     try {
         let emailOwnerData = await prisma.user.findUniqueOrThrow({
             where: { email: email },
-            select:{ id: true }
+            select: { id: true }
         })
 
-        if(emailOwnerData.id.length <= 0)throw new Error
-        let code = GenerateRandomCode(6) 
+        if (emailOwnerData.id.length <= 0) throw new Error
+        let code = GenerateRandomCode(6)
 
         let updateResult = await prisma.user.update({
-            where:{id: emailOwnerData.id},
-            data:{passwordResetCode: code}
+            where: { id: emailOwnerData.id },
+            data: { passwordResetCode: code }
         })
-        
-        return({status: 'success'})
-        
+
+
+        var mailOptions = {
+            from: process.env.EMAIL,
+            to: email,
+            subject: 'Reset Password',
+            
+            // // text: `Your reset password code is ${code}`
+            html: `
+                
+<body style="background-color: #101010;font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+    <table style="background-color: #101010;font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+        <tr>
+            <center>
+                <h1>Your reset password code is</h1>
+            </center>
+        </tr>
+        <tr>
+            <center>
+                <h2
+                    style="width: fit-content;background-color: #e0e0e0;padding: 1rem 2rem;letter-spacing: 15px;font-size: xx-large;border-radius: 5px;">
+                    ${code}</h2>
+            </center>
+        </tr>
+        <tr>
+            <center>
+                <p style="font-size: large;text-align:center;width: 80%; ">If you have not requested to change your
+                    password, just ignore this message</p>
+            </center>
+        </tr>
+        <tr>
+            <center>
+                <h6>By Romodora</h6>
+            </center>
+        </tr>
+        </article>
+    </table>
+</body>
+                `
+            }
+
+
+        transporter.sendMail(mailOptions, function (error, info) {
+            if (error) {
+                throw error
+            } else {
+                console.log('Email sent: ' + info.response);
+            }
+        })
+
+        return ({ status: 'success' })
+
     } catch (error) {
+        console.log(error)
         return ({
             status: 'fail',
             message: "Email not Found"
@@ -130,17 +191,17 @@ async function GetResetPasswordCode({ email }) {
     }
 }
 
-async function ConfirmPasswordCode({email, code}){
+async function ConfirmPasswordCode({ email, code }) {
     try {
         let emailOwnerData = await prisma.user.findUniqueOrThrow({
-            where:{
+            where: {
                 email: email,
                 passwordResetCode: code
             },
-            select: {id:true}
+            select: { id: true }
         })
-        if(!emailOwnerData)throw new Error
-        
+        if (!emailOwnerData) throw new Error
+
         return {
             status: 'success'
         }
@@ -152,14 +213,14 @@ async function ConfirmPasswordCode({email, code}){
     }
 }
 
-async function ResetPassword({email,code,newPassword}){
+async function ResetPassword({ email, code, newPassword }) {
     try {
         let result = await prisma.user.update({
-            where:{
+            where: {
                 email: email,
                 passwordResetCode: code
             },
-            data:{
+            data: {
                 password: hashPassword(newPassword),
                 passwordResetCode: null
             }
@@ -169,9 +230,9 @@ async function ResetPassword({email,code,newPassword}){
             status: 'success'
         }
     } catch (error) {
-        
-        return{
-            status:'fail',
+
+        return {
+            status: 'fail',
             message: 'Invalid Code'
         }
     }
