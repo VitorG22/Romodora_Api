@@ -114,8 +114,6 @@ async function GetResetPasswordCode({ email }) {
             pass: process.env.EMAILPASSWORD
         }
     })
-    console.log(process.env.EMAIL)
-    console.log(process.env.EMAILPASSWORD)
 
     try {
         let emailOwnerData = await prisma.user.findUniqueOrThrow({
