@@ -14,14 +14,15 @@ datasource db {
 }
 
 model User {
-  id           String    @id @unique @default(uuid())
-  name         String
-  email        String    @unique
-  password     String
-  token        String?   @unique
-  token_expire DateTime?
-  picture      String?
-  party        String?
+  id                String    @id @unique @default(uuid())
+  name              String
+  email             String    @unique
+  password          String
+  passwordResetCode String?
+  token             String?   @unique
+  token_expire      DateTime?
+  picture           String?
+  party             String?
 
   journey_owner   Journey[]   @relation("journey_owner")
   character_owner Character[] @relation("character_owner")

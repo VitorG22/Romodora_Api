@@ -3,7 +3,7 @@ const app = require('express')()
 const cors = require('cors')
 const bodyParser = require('body-parser')
 const { GetStickers} = require('./function/assets')
-const { Register, Login, GetUserByToken, ChangeUserData } = require('./function/user')
+const { Register, Login, GetResetPasswordCode, ConfirmPasswordCode, GetUserByToken, ChangeUserData, ResetPassword } = require('./function/user')
 const { CreateJourney, GetJourneys, deleteJourneyByID } = require('./function/journey')
 const { GetCharacters, CreateCharacter, UpdateCharacter ,DeleteCharacter } = require('./function/character')
 
@@ -26,6 +26,22 @@ app.post('/register', async (req, res) => {
     const result = await Register(req.body)
     return res.json(result)
 })
+
+app.post('/GetResetPasswordCode', async (req, res) => {
+    const result = await GetResetPasswordCode(req.body)
+    return res.json(result)
+})
+
+app.post('/ConfirmPasswordCode', async (req, res) => {
+    const result = await ConfirmPasswordCode(req.body)
+    return res.json(result)
+})
+
+app.post('/ResetPassword', async (req, res) => {
+    const result = await ResetPassword(req.body)
+    return res.json(result)
+})
+
 
 app.post('/getUserByToken', async (req, res)=>{
     const result = await GetUserByToken(req.body)

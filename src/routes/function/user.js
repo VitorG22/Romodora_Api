@@ -6,6 +6,7 @@ function hashPassword(password) {
     const hashedPassword = createHash('sha256').update(password).digest('hex')
     return hashedPassword
 }
+
 async function GenerateToken(TokenCharacterCount) {
     const characters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '.', '-', '_', '@', '#', '$', '!', '%', '&']
     let accessToken = ''
@@ -14,7 +15,6 @@ async function GenerateToken(TokenCharacterCount) {
         var randomCharacter = characters[Math.floor(Math.random() * characters.length)]
         accessToken += randomCharacter
     }
-
 
     const response = await prisma.user.findUnique({
         where: {
@@ -92,6 +92,91 @@ async function Register({ name, email, password }) {
     }
 }
 
+async function GetResetPasswordCode({ email }) {
+    function GenerateRandomCode(codeLength){
+        const characters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z','1', '2', '3', '4', '5', '6', '7', '8', '9', '0']
+        let randomString = ''
+    
+        for (i = 0; i < codeLength; i++) {
+            var randomCharacter = characters[Math.floor(Math.random() * characters.length)]
+            randomString += randomCharacter
+        }
+    
+        return randomString
+    }
+    
+    
+    try {
+        let emailOwnerData = await prisma.user.findUniqueOrThrow({
+            where: { email: email },
+            select:{ id: true }
+        })
+
+        if(emailOwnerData.id.length <= 0)throw new Error
+        let code = GenerateRandomCode(6) 
+
+        let updateResult = await prisma.user.update({
+            where:{id: emailOwnerData.id},
+            data:{passwordResetCode: code}
+        })
+        
+        return({status: 'success'})
+        
+    } catch (error) {
+        return ({
+            status: 'fail',
+            message: "Email not Found"
+        })
+    }
+}
+
+async function ConfirmPasswordCode({email, code}){
+    try {
+        let emailOwnerData = await prisma.user.findUniqueOrThrow({
+            where:{
+                email: email,
+                passwordResetCode: code
+            },
+            select: {id:true}
+        })
+        if(!emailOwnerData)throw new Error
+        
+        return {
+            status: 'success'
+        }
+    } catch (error) {
+        return {
+            status: 'fail',
+            message: 'Invalid Code'
+        }
+    }
+}
+
+async function ResetPassword({email,code,newPassword}){
+    try {
+        let result = await prisma.user.update({
+            where:{
+                email: email,
+                passwordResetCode: code
+            },
+            data:{
+                password: hashPassword(newPassword),
+                passwordResetCode: null
+            }
+        })
+
+        return {
+            status: 'success'
+        }
+    } catch (error) {
+        
+        return{
+            status:'fail',
+            message: 'Invalid Code'
+        }
+    }
+}
+
 async function ChangeUserData({ name, picture, token }) {
     try {
         let newPlayerData = await prisma.user.update({
@@ -151,4 +236,4 @@ async function GetUserByToken({ token }) {
     }
 }
 
-module.exports = { Login, Register, GetUserByToken, ChangeUserData }
+module.exports = { Login, Register, GetUserByToken, ChangeUserData, GetResetPasswordCode, ConfirmPasswordCode, ResetPassword }
