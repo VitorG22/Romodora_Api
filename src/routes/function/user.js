@@ -126,7 +126,8 @@ async function GetResetPasswordCode({ email }) {
 
         let updateResult = await prisma.user.update({
             where: { id: emailOwnerData.id },
-            data: { passwordResetCode: code }
+            data: { passwordResetCode: code },
+            select:{id: true}
         })
 
 
@@ -134,10 +135,7 @@ async function GetResetPasswordCode({ email }) {
             from: process.env.EMAIL,
             to: email,
             subject: 'Reset Password',
-            
-            // // text: `Your reset password code is ${code}`
             html: `
-                
 <body style="background-color: #101010;font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
     <table style="background-color: #101010;font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
         <tr>
