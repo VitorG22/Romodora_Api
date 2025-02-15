@@ -125,7 +125,7 @@ async function GetResetPasswordCode({ email }) {
 
         await prisma.user.update({
             where: { id: emailOwnerData.id },
-            data: { name: "Teste" }
+            data: { passwordResetCode: code }
         })
 
 
