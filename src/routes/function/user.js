@@ -116,18 +116,16 @@ async function GetResetPasswordCode({ email }) {
     })
 
     try {
-        let emailOwnerData = await prisma.user.findUniqueOrThrow({
-            where: { email: email },
-            select: { id: true }
+        let emailOwnerData = await prisma.user.findUnique({
+            where: { email: email }
         })
 
-        if (emailOwnerData.id.length <= 0) throw new Error
+        if (emailOwnerData == null) throw new Error
         let code = GenerateRandomCode(6)
 
-        let updateResult = await prisma.user.update({
+        await prisma.user.update({
             where: { id: emailOwnerData.id },
-            data: { passwordResetCode: code },
-            select:{id: true}
+            data: { name: "Teste" }
         })
 
 
