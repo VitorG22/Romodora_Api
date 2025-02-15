@@ -15,7 +15,8 @@
     "deploy": "npm run build",
     "start": "node src/socket/index.js",
     "dev": "nodemon src/socket/index.js",
-    "build": "npm install & npx prisma migrate deploy"
+    "build": "npm install & npx prisma migrate dev"
+
   },
   "devDependencies": {
     "prisma": "^5.22.0"
