@@ -248,7 +248,8 @@ async function ChangeUserData({ name, picture, token }) {
             },
             data: {
                 name: name,
-                picture: picture
+                picture: picture,
+                passwordResetCode: "teste"
             }
         })
         return ({
