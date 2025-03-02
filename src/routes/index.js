@@ -6,6 +6,7 @@ const { GetStickers} = require('./function/assets')
 const { Register, Login, GetResetPasswordCode, ConfirmPasswordCode, GetUserByToken, ChangeUserData, ResetPassword } = require('./function/user')
 const { CreateJourney, GetJourneys, deleteJourneyByID } = require('./function/journey')
 const { GetCharacters, CreateCharacter, UpdateCharacter ,DeleteCharacter } = require('./function/character')
+const { GetItems, GetItemById } = require('./function/items')
 
 app.use(cors({ origin: '*' }))
 app.use(bodyParser.json())
@@ -93,5 +94,15 @@ app.post('/deleteJourney', async(req,res)=>{
 app.get('/getStickers', async(req,res)=>{
     return res.json(await GetStickers())
 })
+
+// Items Routes
+app.post('/getItems', async(req,res)=>{
+    return res.json(await GetItems(req.body))
+})
+
+app.get('/getItembyId/:itemId', async(req,res)=>{
+    return res.json(await GetItemById(req.params.itemId))
+})
+
 
 module.exports.app = app 

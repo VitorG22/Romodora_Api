@@ -26,6 +26,7 @@ model User {
 
   journey_owner   Journey[]   @relation("journey_owner")
   character_owner Character[] @relation("character_owner")
+  item_owner      Item[]      @relation("item_owner")
 }
 
 model Journey {
@@ -66,4 +67,25 @@ model Character {
   charisma     String
 
   character_owner User? @relation("character_owner", fields: [owner], references: [id])
+}
+
+model Item {
+  id               String  @id @unique @default(uuid())
+  name             String
+  image            String
+  description      String
+  type             String
+  usageCount       Int
+  isLaunchable     Boolean
+  launcheRange     Int
+  healDiceType     Int
+  healDiceAmount   Int
+  healEffectArea   Int
+  damageDiceType   Int
+  damageDiceAmount Int
+  damageType       String
+  damageEffectArea Int
+  owner            String
+
+  item_owner User? @relation("item_owner", fields: [owner], references: [id])
 }
