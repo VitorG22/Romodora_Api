@@ -1,0 +1,60 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id       String  @id @default(uuid())
+  email    String  @unique
+  name     String
+  password String
+  picture  String?
+
+  game_host       ActiveGame[] @relation("game_host")
+  character_owner Character[]  @relation("character_owner")
+}
+
+model RegisterCode {
+  id       String @id @default(uuid())
+  code     String
+  email    String @unique
+  password String
+  name     String
+}
+
+model ActiveGame {
+  id       String  @id
+  hostId   String  @unique
+  name     String
+  password String?
+
+  game_host User @relation("game_host", fields: [hostId], references: [id])
+}
+
+model Character {
+  name         String
+  id           String @id @default(uuid())
+  picture      String
+  class        String
+  subClass     String
+  race         String
+  subRace      String
+  strength     Int
+  dexterity    Int
+  constitution Int
+  intelligence Int
+  wisdom       Int
+  charisma     Int
+  level        Int
+  life         Int
+  maxLife      Int
+
+  ownerId String
+
+  owner User @relation("character_owner", fields: [ownerId], references: [id])
+}
