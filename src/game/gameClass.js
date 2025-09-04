@@ -8,8 +8,8 @@ class Game{
         this.tableData = {players: []}
 
 
-        this.emitUpdateGame= (data) =>{
-            io.to(`GameRoom:${this.lobbyId}`).emit('updateGameData', data)
+        this.emitUpdateGame= () =>{
+            io.to(`GameRoom:${this.lobbyId}`).emit('updateGameData')
         }
     
     }
@@ -24,7 +24,8 @@ class Game{
         if(playerIndex == -1)return
 
         this.tableData.players[playerIndex] = newPlayerData
-        this.emitUpdateGame({tableData: this.tableData})
+        // this.emitUpdateGame({tableData: this.tableData})
+        this.emitUpdateGame()
     }
 
 }
