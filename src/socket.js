@@ -1,7 +1,7 @@
 const { Server } = require('socket.io')
 const { GenerateRandomCode } = require('./scripts/randomCode')
 const { getUserDataByToken } = require('./userFunctions/userData')
-const { hostGame, logGames, deleteGame, getActiveGames, joinInGame, quitFromGame } = require('./game/functions')
+const { FindGameInstanceById,hostGame, logGames, deleteGame, getActiveGames, joinInGame, quitFromGame } = require('./game/functions')
 
 function startSocket(server) {
     const io = new Server(server, {
@@ -26,16 +26,9 @@ function startSocket(server) {
         // ----- GAME ----- //
         
         socket.on('createGame', (payload, callback) => {
-            hostGame(socket, payload, callback)
+            hostGame(socket, payload, callback, io)
         })
 
-        socket.on('teste', () => {
-            // console.log('teste')
-            // console.log(socket.data.userData)
-            // logGames()
-            console.log(rooms)
-            // deleteGame(socket.data.userData)
-        })
 
         socket.on('getActiveGames', (callback)=>{
             getActiveGames(callback)
@@ -47,6 +40,13 @@ function startSocket(server) {
 
         socket.on('quitGame', (payload)=>{
             quitFromGame(payload, socket, io)
+        })
+
+        socket.on('changePlayerData', (payload)=>{
+            let game = FindGameInstanceById(payload.gameId)    
+            console.log(game)
+            if(game == null) return
+            game.changePlayerData(socket.data.userData.id, payload.newPlayerData )
         })
     })
 }

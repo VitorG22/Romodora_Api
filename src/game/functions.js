@@ -10,35 +10,19 @@ function logGames() {
     console.log(GamesInstancesList)
 }
 
-async function hostGame(socket, gameData, callback) {
-    console.log(socket.data.userData)
+async function hostGame(socket, gameData, callback, io) {
 
     try {
-        const newGameDataInDB = await prisma.activeGame.upsert({
-            where: { hostId: socket.data.userData.id },
-            create: {
-                id: nanoid(6),
-                hostId: socket.data.userData.id,
-                name: gameData.name,
-                password: gameData.password || null
-            },
-            update: {
-                id: nanoid(6),
-                name: gameData.name,
-                hostId: socket.data.userData.id,
-                password: gameData.password || null
-            }
-        })
-
-
+        deleteGame(socket.data.userData.id)
 
         let playersList = []
         playersList.push(socket.data.userData)
 
         let newGame = new Game({
-            name: newGameDataInDB.name,
-            hostId: socket.data.userData.id,
-            lobbyId: newGameDataInDB.id,
+            io: io,
+            name: gameData.name,
+            hostData: socket.data.userData,
+            lobbyId: nanoid(6),
             users: playersList
         })
 
@@ -55,41 +39,33 @@ async function hostGame(socket, gameData, callback) {
     }
 }
 
-async function deleteGame(userData) {
+function deleteGame(userData) {
 
     try {
-        await prisma.activeGame.delete({
-            where: {
-                hostId: userData.id
-            }
-        })
-        GamesInstancesList = GamesInstancesList.map((gameData) => { if (gameData.hostId != userData.id) return gameData })
-    } catch (err) {
+        gameInstanceIndex = GamesInstancesList.findIndex(gameData=> gameData.hostData.id == userData.id)
         
-    }
+        if(GamesInstancesList != -1){
+            GamesInstancesList.splice(gameInstanceIndex, 1)
+        }
+    } catch (err) {}
 }
 
 async function getActiveGames(callback) {
 
     try {
-        let activeGames = await prisma.activeGame.findMany({
-            select: {
-                id: true,
-                name: true,
-                password: true,
-                game_host: {
-                    select: {
-                        name: true,
-                        picture: true
-                    }
-                }
+
+        GamesInstancesList.map(gameData=> console.log(gameData))
+        let activeGamesList = GamesInstancesList.map(gameData => {
+            return {
+                id: gameData.lobbyId,
+                name: gameData.name,
+                game_host: gameData.hostData,
+                users: gameData.users
             }
         })
 
-        activeGames = activeGames.map((gameData) => {
-            return { ...gameData, password: !!gameData.password }
-        })
-        callback({ status: 200, activeGamesList: activeGames })
+        callback({ status: 200, activeGamesList: activeGamesList })
+
 
     } catch (error) {
         console.log(error)
@@ -97,35 +73,45 @@ async function getActiveGames(callback) {
     }
 }
 
-function joinInGame(gameId, socket,io, callback) {
+function joinInGame(gameId, socket, io, callback) {
     let game = FindGameInstanceById(gameId)
 
-    if(!game){callback({status: 400})}
+    if (!game) { callback({ status: 400 }) }
     game.users.push(socket.data.userData)
-    
-    
+    game.tableData.players.push({...socket.data.userData, character: null})
+
+
     socket.join(`GameRoom:${game.lobbyId}`)
-    callback({status:200})
-    
-    EmitUpdateGame(game, io)
-    
+    callback({ status: 200 })
+
+    game.emitUpdateGame()
+    // EmitUpdateGame(game.lobbyId, game, io)
+
 }
 
-function EmitUpdateGame(gameData, io){
-    // console.log(gameData, io)
-    io.to(`GameRoom:${gameData.lobbyId}`).emit('updateGameData', gameData)
-}
-
-function quitFromGame({gameId}, socket, io){
+function quitFromGame({ gameId }, socket, io) {
     socket.leave(`GameRoom:${gameId}`)
     let game = FindGameInstanceById(gameId)
-    userIndex = game.users.findIndex(userData => userData.id != socket.data.userData.id)
-    game.users = game.users.slice(userIndex, 1)
-    EmitUpdateGame(game, io)
+    if(!game){
+        return
+    }
+    if(game.hostData.id == socket.data.userData.id){
+        deleteGame(socket.data.userData)
+        return
+    }
+    
+    let userIndex = game.users.findIndex(userData => userData.id == socket.data.userData.id)
+    game.users.splice(userIndex, 1)
+
+    let playerIndex = game.tableData.players.findIndex(playerData => playerData.id == socket.data.userData.id) 
+    game.tableData.players.splice(playerIndex, 1)
+
+    game.emitUpdateGame()
 }
 
-function FindGameInstanceById(gameId){
-    let game = GamesInstancesList.find((gameData)=>gameData.lobbyId == gameId) || null
+function FindGameInstanceById(gameId) {
+    GamesInstancesList.map((gameData) => console.log(gameData.lobbyId))
+    let game = GamesInstancesList.find((gameData) => gameData.lobbyId == gameId)
     return game
 }
 
@@ -135,5 +121,6 @@ module.exports = {
     deleteGame,
     getActiveGames,
     joinInGame,
-    quitFromGame
+    quitFromGame,
+    FindGameInstanceById
 }
