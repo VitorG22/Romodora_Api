@@ -39,12 +39,11 @@ async function hostGame(socket, gameData, callback, io) {
     }
 }
 
-function deleteGame(userData) {
+function deleteGame(userId) {
 
     try {
-        gameInstanceIndex = GamesInstancesList.findIndex(gameData=> gameData.hostData.id == userData.id)
-        
-        if(GamesInstancesList != -1){
+        gameInstanceIndex = GamesInstancesList.findIndex(gameData=> gameData.hostData.id == userId)
+        if(gameInstanceIndex != -1){
             GamesInstancesList.splice(gameInstanceIndex, 1)
         }
     } catch (err) {}
@@ -54,7 +53,7 @@ async function getActiveGames(callback) {
 
     try {
 
-        GamesInstancesList.map(gameData=> console.log(gameData))
+        GamesInstancesList.map(gameData=> console.log(gameData.lobbyId))
         let activeGamesList = GamesInstancesList.map(gameData => {
             return {
                 id: gameData.lobbyId,
@@ -96,7 +95,7 @@ function quitFromGame({ gameId }, socket, io) {
         return
     }
     if(game.hostData.id == socket.data.userData.id){
-        deleteGame(socket.data.userData)
+        deleteGame(socket.data.userData.id)
         return
     }
     
