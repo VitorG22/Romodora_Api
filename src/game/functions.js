@@ -83,8 +83,8 @@ function joinInGame(gameId, socket, io, callback) {
     socket.join(`GameRoom:${game.lobbyId}`)
     callback({ status: 200 })
 
-    game.emitUpdateGame()
-    // EmitUpdateGame(game.lobbyId, game, io)
+    game.emitUpdateGame(game)
+    
 
 }
 
@@ -105,7 +105,7 @@ function quitFromGame({ gameId }, socket, io) {
     let playerIndex = game.tableData.players.findIndex(playerData => playerData.id == socket.data.userData.id) 
     game.tableData.players.splice(playerIndex, 1)
 
-    game.emitUpdateGame()
+    game.emitUpdateGame({tableData: game.tableData})
 }
 
 function FindGameInstanceById(gameId) {
