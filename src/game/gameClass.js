@@ -6,13 +6,27 @@ class Game{
         this.lobbyId = lobbyId
         this.name = name
         this.tableData = {players: []}
-
+        this.chat = []
 
         
         this.emitUpdateGame = (data) => {
-            // io.to(`GameRoom:${this.lobbyId}`).emit('updateGameData', this)
             io.to(`GameRoom:${this.lobbyId}`).emit('updateGameData', data)
         }
+
+        this.emitUpdateTable = (data) =>{
+            io.to(`GameRoom:${this.lobbyId}`).emit('updateTableData', data)
+        }
+
+        this.emitAction = (action) =>{
+            io.to(`GameRoom:${this.lobbyId}`).emit(action)
+        }
+
+    }
+
+    sendMessage(data){
+        console.log(data)
+        this.chat.push(data)
+        this.emitUpdateGame({chat: this.chat})
     }
 
     logLobbyID(){
@@ -28,6 +42,17 @@ class Game{
         this.emitUpdateGame({
             tableData: this.tableData
         })
+    }
+
+    emitStartGame(userId){
+        if(this.hostData.id != userId)return
+
+        let isAllPlayersRead = true
+        this.tableData.players.forEach(playerData => {if(playerData.character == null) isAllPlayersRead = false})
+
+        if(isAllPlayersRead){
+            this.emitAction('startGame')      
+        }
     }
 
 }
