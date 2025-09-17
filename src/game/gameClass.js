@@ -1,3 +1,5 @@
+const { random } = require("nanoid");
+
 class Game{
     users; lobbyId; hostData;name;
     constructor({ io,name, users, lobbyId, hostData }) {
@@ -55,6 +57,17 @@ class Game{
         }
     }
 
+    rollDice(userData,DiceValue){
+        let randomValue = Math.floor(Math.random() * DiceValue) + 1
+        this.sendMessage({
+                ownerData: {
+                    id: userData.id,
+                    name: userData.name,
+                },
+                type: "system",
+                message: `${userData.name} roll ${randomValue} in D${DiceValue}`
+            })
+    }
 }
 
 module.exports = {

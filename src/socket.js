@@ -67,6 +67,12 @@ function startSocket(server) {
                 message: payload.message
             })
         })
+
+        socket.on('rollDice', (payload)=>{
+            let game = FindGameInstanceById(payload.gameId)
+            if (game == null) return
+            game.rollDice(socket.data.userData, payload.DiceValue)
+        })
     })
 }
 
