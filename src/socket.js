@@ -13,7 +13,6 @@ function startSocket(server) {
 
 
     io.on('connection', (socket) => {
-        console.log(`connected ID: ${socket.id}`)
         socket.on('disconnect', () => deleteGame(socket.data.userData))
 
 
@@ -44,7 +43,6 @@ function startSocket(server) {
 
         socket.on('changePlayerData', (payload) => {
             let game = FindGameInstanceById(payload.gameId)
-            console.log(game)
             if (game == null) return
             game.changePlayerData(socket.data.userData.id, payload.newPlayerData)
         })

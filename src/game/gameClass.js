@@ -26,7 +26,6 @@ class Game{
     }
 
     sendMessage(data){
-        console.log(data)
         this.chat.push(data)
         this.emitUpdateGame({chat: this.chat})
     }

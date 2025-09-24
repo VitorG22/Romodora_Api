@@ -26,7 +26,6 @@ app.get('/', (req, res) => {
 
 
 app.post('/login', (req, res) => {
-    console.log(req.body)
     Login(req.body, res)
 })
 
