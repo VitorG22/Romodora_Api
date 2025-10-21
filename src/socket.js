@@ -9,7 +9,6 @@ function startSocket(server) {
         cors: { origin: '*' }
     })
 
-    const rooms = io.of('/').adapter.rooms
 
 
     io.on('connection', (socket) => {
