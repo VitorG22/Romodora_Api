@@ -11,6 +11,7 @@ const { startSocket } = require("./socket.js")
 const { EditCharacter } = require("./characterFunctions/createCharacter.js")
 const { getUserCharacters, getCharacterById } = require("./characterFunctions/getCharacter.js")
 const { deleteCharacter } = require("./characterFunctions/deleteCharacter.js")
+const { getAssetsList } = require("./mapCreationFunctions/getAssetsList.js")
 
 const app = express();
 const server = http.createServer(app);
@@ -59,6 +60,11 @@ app.get('/getCharacterById/:characterId', authenticateTokenMiddleware, (req,res)
 
 app.post('/deleteCharacter', authenticateTokenMiddleware, (req,res)=>{
     deleteCharacter(req,res)
+})
+
+app.get('/mapAssets', authenticateTokenMiddleware, (req,res)=>{
+    console.log("teste")
+    getAssetsList(res)
 })
 
 const PORT = process.env.PORT
