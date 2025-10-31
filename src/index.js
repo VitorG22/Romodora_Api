@@ -46,25 +46,37 @@ app.post('/changeUserData', authenticateTokenMiddleware, (req, res) => {
     changeUserData(req, res)
 })
 
-app.post('/editCharacter', authenticateTokenMiddleware, (req,res)=>{
-    EditCharacter(req,res)
+app.post('/editCharacter', authenticateTokenMiddleware, (req, res) => {
+    EditCharacter(req, res)
 })
 
-app.get('/getUserCharacters', authenticateTokenMiddleware, (req,res)=>{
-    getUserCharacters(req,res)
+app.get('/getUserCharacters', authenticateTokenMiddleware, (req, res) => {
+    getUserCharacters(req, res)
 })
 
-app.get('/getCharacterById/:characterId', authenticateTokenMiddleware, (req,res)=>{
-    getCharacterById(req,res)
+app.get('/getCharacterById/:characterId', authenticateTokenMiddleware, (req, res) => {
+    getCharacterById(req, res)
 })
 
-app.post('/deleteCharacter', authenticateTokenMiddleware, (req,res)=>{
-    deleteCharacter(req,res)
+app.post('/deleteCharacter', authenticateTokenMiddleware, (req, res) => {
+    deleteCharacter(req, res)
 })
 
-app.get('/mapAssets', authenticateTokenMiddleware, (req,res)=>{
-    console.log("teste")
+app.get('/mapAssets', authenticateTokenMiddleware, (req, res) => {
     getAssetsList(res)
+})
+
+app.get('/proxy', async (req, res) => {
+    const url = req.query.url;
+    if (!url) return res.status(400).send("URL missing");
+
+    const response = await fetch(url);
+    const blob = await response.arrayBuffer();
+
+    res.set("Access-Control-Allow-Origin", "*");
+    res.set("Content-Type", response.headers.get("content-type"));
+    res.send(Buffer.from(blob));
+
 })
 
 const PORT = process.env.PORT
