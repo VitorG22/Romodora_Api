@@ -1,5 +1,5 @@
 const fs = require('fs')
-const sizeOf = require('image-size')
+const {imageSizeFromFile} = require('image-size/fromFile')
 
 const assetsDir = '../../assets/tiles'
 
@@ -14,11 +14,12 @@ async function AssetsJson() {
             await new Promise(resolve => {
                 fs.readdir(`${assetsDir}/${folderName}`, (error, tilesList) => {
                     if (error) return
-                    tilesList.forEach((tileName, tileIndex) => {
+                    tilesList.forEach(async(tileName, tileIndex) => {
+                        console.log(folderName)
                         assetsObject[folderName].push({
                             path: `https://github.com/VitorG22/Romodora_Api/blob/main/assets/tiles/${folderName}/${tileName}?raw=true`,
                             name: getImageName(tileName),
-                            size: getImageSize(tileName),
+                            size: await getImageSize(folderName,tileName),
                             group: folderName.replace('_', ' ')
                         })
                         if(tileIndex == tilesList.length - 1){resolve()}
@@ -49,21 +50,28 @@ function getImageName(fileName) {
     return fileNameCopy
 }
 
-function getImageSize(fileName) {
-    const numberList = '0123456789'
-    let fileNameCopy = fileName.replace('.png', '')
+// function getImageSize(fileName) {
+//     const numberList = '0123456789'
+//     let fileNameCopy = fileName.replace('.png', '')
 
 
-    if (numberList.includes(fileNameCopy[fileNameCopy.length - 1]) == false) {
-        fileNameCopy = fileNameCopy.slice(0, -2)
-    }
+//     if (numberList.includes(fileNameCopy[fileNameCopy.length - 1]) == false) {
+//         fileNameCopy = fileNameCopy.slice(0, -2)
+//     }
 
-    let fileNameSplit = fileNameCopy.split("_")
+//     let fileNameSplit = fileNameCopy.split("_")
 
 
-    let sizeSplit = fileNameSplit[fileNameSplit.length - 1].split('x')
-    let size = { x: parseInt(sizeSplit[0]), y: parseInt(sizeSplit[1]) }
-    return size
+//     let sizeSplit = fileNameSplit[fileNameSplit.length - 1].split('x')
+//     let size = { x: parseInt(sizeSplit[0]), y: parseInt(sizeSplit[1]) }
+//     return size
+// }
+
+async function getImageSize(folderName,fileName){
+    const dimensions = await imageSizeFromFile(`../../assets/tiles/${folderName}/${fileName}`)
+    let size = {x:dimensions.width/200 ,y:dimensions.height/200}
+    return(size)
 }
+
 
 AssetsJson()
