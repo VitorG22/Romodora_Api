@@ -32,9 +32,14 @@ async function AssetsJson() {
 
 }
 
-function getImageName(fileName) {
-    let fileNameCopy = fileName.replace('.png', '').replace('_', " ")
-    return fileNameCopy
+function getImageName(tileName) {
+    let tileNameCopy = tileName.replace('.png', '')
+    let tileNameSplit = tileNameCopy.split('_')
+    tileNameCopy = tileNameSplit.join(' ').trim()
+    console.log(tileNameCopy)
+    
+    return tileNameCopy
+
 }
 
 async function getImageSize(folderName,fileName){
