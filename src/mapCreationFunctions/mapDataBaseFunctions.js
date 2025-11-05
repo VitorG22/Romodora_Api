@@ -51,8 +51,24 @@ async function getAllUserMaps(req,res) {
     }
 }
 
+async function deleteMapById(req,res){
+    const userData = req.user
+    try {
+        await prisma.map.delete({
+            where: {
+                id:req.body.mapId,
+                ownerId: userData.userId
+            }
+        })
+        res.sendStatus(200)
+    } catch (error) {
+        console.log(error)
+        res.sendStatus(400)
+    }
+}
 
 module.exports = {
     SaveMap,
-    getAllUserMaps
+    getAllUserMaps,
+    deleteMapById
 }
