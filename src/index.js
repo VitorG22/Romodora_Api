@@ -12,6 +12,7 @@ const { EditCharacter } = require("./characterFunctions/createCharacter.js")
 const { getUserCharacters, getCharacterById } = require("./characterFunctions/getCharacter.js")
 const { deleteCharacter } = require("./characterFunctions/deleteCharacter.js")
 const { getAssetsList } = require("./mapCreationFunctions/getAssetsList.js")
+const { SaveMap, getAllUserMaps } = require("./mapCreationFunctions/mapDataBaseFunctions.js")
 
 const app = express();
 const server = http.createServer(app);
@@ -64,6 +65,13 @@ app.post('/deleteCharacter', authenticateTokenMiddleware, (req, res) => {
 
 app.get('/mapAssets', authenticateTokenMiddleware, (req, res) => {
     getAssetsList(res)
+})
+app.get('/allMaps', authenticateTokenMiddleware, (req, res) => {
+    getAllUserMaps(req,res)
+})
+
+app.post('/saveMap', authenticateTokenMiddleware, (req, res)=>{
+    SaveMap(req,res)
 })
 
 app.get('/proxy', async (req, res) => {

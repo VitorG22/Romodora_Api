@@ -17,6 +17,7 @@ model User {
 
   game_host       ActiveGame[] @relation("game_host")
   character_owner Character[]  @relation("character_owner")
+  map_owner       Map[]        @relation("map_owner")
 }
 
 model RegisterCode {
@@ -57,4 +58,18 @@ model Character {
   ownerId String
 
   owner User @relation("character_owner", fields: [ownerId], references: [id])
+}
+
+model Map {
+  id          String   @id @default(uuid())
+  description String
+  name        String
+  lastModify  DateTime
+  sizeX       Int
+  sizeY       Int
+  layers      Json
+
+  ownerId String
+
+  owner User @relation("map_owner", fields: [ownerId], references: [id])
 }

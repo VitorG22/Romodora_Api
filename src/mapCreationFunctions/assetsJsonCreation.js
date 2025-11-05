@@ -36,7 +36,6 @@ function getImageName(tileName) {
     let tileNameCopy = tileName.replace('.png', '')
     let tileNameSplit = tileNameCopy.split('_')
     tileNameCopy = tileNameSplit.join(' ').trim()
-    console.log(tileNameCopy)
     
     return tileNameCopy
 
