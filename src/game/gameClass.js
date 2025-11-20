@@ -1,71 +1,111 @@
 const { random } = require("nanoid");
 
-class Game{
-    users; lobbyId; hostData;name;
-    constructor({ io,name, users, lobbyId, hostData }) {
+class Game {
+    users; lobbyId; hostData; name;
+    constructor({ io, name, users, lobbyId, hostData }) {
         this.hostData = hostData
         this.users = users
         this.lobbyId = lobbyId
         this.name = name
-        this.tableData = {players: []}
+        this.tableControl = {
+            lobbyId: lobbyId,
+            players: [],
+            tableMap: null
+        }
         this.chat = []
 
-        
+
         this.emitUpdateGame = (data) => {
             io.to(`GameRoom:${this.lobbyId}`).emit('updateGameData', data)
         }
 
-        this.emitUpdateTable = (data) =>{
+        this.emitUpdateTable = (data) => {
             io.to(`GameRoom:${this.lobbyId}`).emit('updateTableData', data)
         }
 
-        this.emitAction = (action) =>{
+        this.emitAction = (action) => {
             io.to(`GameRoom:${this.lobbyId}`).emit(action)
         }
 
     }
 
-    sendMessage(data){
+    sendMessage(data) {
         this.chat.push(data)
-        this.emitUpdateGame({chat: this.chat})
+        this.emitUpdateGame({ chat: this.chat })
     }
 
-    logLobbyID(){
+    logLobbyID() {
         return this.lobbyId
     }
 
-    changePlayerData(userId, newPlayerData){
-        let playerIndex = this.tableData.players.findIndex(playerData => playerData.id == userId)
+    changePlayerData(userId, newPlayerData) {
+        let playerIndex = this.tableControl.players.findIndex(playerData => playerData.id == userId)
 
-        if(playerIndex == -1)return
+        if (playerIndex == -1) return
 
-        this.tableData.players[playerIndex] = newPlayerData
-        this.emitUpdateGame({
-            tableData: this.tableData
+        this.tableControl.players[playerIndex] = newPlayerData
+
+
+
+        this.emitUpdateTable({
+            TypeToChange: "player",
+            data: {
+                playerData: this.tableControl.players[playerIndex]
+            }
         })
+
+
     }
 
-    emitStartGame(userId){
-        if(this.hostData.id != userId)return
+    changePlayerCharacterData({ newCharacterData, characterOwnerId }, userId) {
+        let playerOwner = this.tableControl.players.find(playerData => playerData.id == characterOwnerId)
+        if (this.hostData.id != userId && playerOwner.id != userId) return
+
+        playerOwner.character = { ...playerOwner.character, ...newCharacterData }
+
+        this.emitUpdateTable({
+            TypeToChange: "character",
+            data: {
+                userId: playerOwner.id,
+                characterData: playerOwner.character
+            }
+        })
+
+    }
+
+
+    changeSelectedMap(mapData) {
+        this.tableControl.tableMap = mapData
+        console.log(mapData)
+        this.emitUpdateTable({
+            TypeToChange: "tableMap",
+            data: this.tableControl.tableMap
+        })
+
+    }
+
+
+    emitStartGame(userId) {
+        if (this.hostData.id != userId) return
 
         let isAllPlayersRead = true
-        this.tableData.players.forEach(playerData => {if(playerData.character == null) isAllPlayersRead = false})
+        this.tableControl.players.forEach(playerData => { if (playerData.character == null) isAllPlayersRead = false })
 
-        if(isAllPlayersRead){
-            this.emitAction('startGame')      
+        if (isAllPlayersRead) {
+            this.emitAction('startGame')
         }
     }
 
-    rollDice(userData,DiceValue){
+    rollDice(userData, DiceValue) {
         let randomValue = Math.floor(Math.random() * DiceValue) + 1
         this.sendMessage({
-                ownerData: {
-                    id: userData.id,
-                    name: userData.name,
-                },
-                type: "system",
-                message: `${userData.name} roll ${randomValue} in D${DiceValue}`
-            })
+            ownerData: {
+                id: userData.id,
+                name: userData.name,
+            },
+            type: "system",
+            message: `${userData.name} roll ${randomValue} in D${DiceValue}`
+        })
     }
 }
 

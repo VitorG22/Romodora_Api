@@ -2,6 +2,7 @@ const { Server } = require('socket.io')
 const { GenerateRandomCode } = require('./scripts/randomCode')
 const { getUserDataByToken } = require('./userFunctions/userData')
 const { FindGameInstanceById, hostGame, logGames, deleteGame, getActiveGames, joinInGame, quitFromGame } = require('./game/functions')
+const { getMapById } = require('./mapCreationFunctions/mapDataBaseFunctions')
 
 function startSocket(server) {
     const io = new Server(server, {
@@ -70,6 +71,26 @@ function startSocket(server) {
             if (game == null) return
             game.rollDice(socket.data.userData, payload.DiceValue)
         })
+
+        socket.on('changeSelectedMap', async(payload)=>{
+            let game = FindGameInstanceById(payload.gameId)
+            if (game == null ||game.hostData.id != socket.data.userData.id) return
+            
+            let mapData = await  getMapById(payload.mapId,socket.data.userData.id)
+            if(mapData == null)return
+
+            console.log(payload.mapId)
+            game.changeSelectedMap(mapData)
+        })
+
+        socket.on('changePlayerCharacterData', async(payload)=>{
+            let game = FindGameInstanceById(payload.gameId)
+            if (game == null) {return}
+
+            game.changePlayerCharacterData(payload, socket.data.userData.id)
+        })
+
+
     })
 }
 

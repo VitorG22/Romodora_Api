@@ -67,8 +67,24 @@ async function deleteMapById(req,res){
     }
 }
 
+async function getMapById(mapId, userId){
+    try {
+        let map = await prisma.map.findFirstOrThrow({
+            where:{
+                id: mapId,
+                ownerId: userId
+            }
+        })
+        return map
+    } catch (error) {
+        console.log(error)
+        return null
+    }
+}
+
 module.exports = {
     SaveMap,
     getAllUserMaps,
-    deleteMapById
+    deleteMapById,
+    getMapById
 }

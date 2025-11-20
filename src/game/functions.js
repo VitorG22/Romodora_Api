@@ -82,7 +82,7 @@ function joinInGame(gameId, socket, io, callback) {
 
     if (!game) { callback({ status: 400 }) }
     game.users.push({...socket.data.userData, color:randomColor})
-    game.tableData.players.push({ ...socket.data.userData, character: null, color:randomColor })
+    game.tableControl.players.push({ ...socket.data.userData, character: null, color:randomColor })
 
 
     socket.join(`GameRoom:${game.lobbyId}`)
@@ -107,10 +107,10 @@ function quitFromGame({ gameId }, socket, io) {
     let userIndex = game.users.findIndex(userData => userData.id == socket.data.userData.id)
     game.users.splice(userIndex, 1)
 
-    let playerIndex = game.tableData.players.findIndex(playerData => playerData.id == socket.data.userData.id)
-    game.tableData.players.splice(playerIndex, 1)
+    let playerIndex = game.tableControl.players.findIndex(playerData => playerData.id == socket.data.userData.id)
+    game.tableControl.players.splice(playerIndex, 1)
 
-    game.emitUpdateGame({ tableData: game.tableData })
+    game.emitUpdateGame({ tableControl: game.tableControl })
 }
 
 function FindGameInstanceById(gameId) {
