@@ -1,5 +1,3 @@
-const { random } = require("nanoid");
-
 class Game {
     users; lobbyId; hostData; name;
     constructor({ io, name, users, lobbyId, hostData }) {
@@ -27,6 +25,17 @@ class Game {
             io.to(`GameRoom:${this.lobbyId}`).emit(action)
         }
 
+
+        this.playerJoin = (userId) => {
+            let userData = this.users.find(user => user.id == userId)
+            if (!userData) return
+
+            io.to(`GameRoom:${this.lobbyId}`).emit('playerJoin', userData)
+        }
+
+        this.playerLeave = (userId) => {
+            io.to(`GameRoom:${this.lobbyId}`).emit('playerLeave', userId)
+        }
     }
 
     sendMessage(data) {
@@ -70,13 +79,11 @@ class Game {
                 characterData: playerOwner.character
             }
         })
-
     }
 
 
     changeSelectedMap(mapData) {
         this.tableControl.tableMap = mapData
-        console.log(mapData)
         this.emitUpdateTable({
             TypeToChange: "tableMap",
             data: this.tableControl.tableMap

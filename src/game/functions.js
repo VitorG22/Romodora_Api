@@ -1,7 +1,6 @@
 const { nanoid } = require('nanoid')
-const { PrismaClient } = require('../generated/prisma/client.js')
 const { Game } = require('./gameClass.js')
-const prisma = new PrismaClient()
+
 
 let GamesInstancesList = []
 
@@ -86,11 +85,9 @@ function joinInGame(gameId, socket, io, callback) {
 
 
     socket.join(`GameRoom:${game.lobbyId}`)
-    callback({ status: 200 })
+    callback({ status: 200, gameData: game })
 
-    game.emitUpdateGame(game)
-
-
+    game.playerJoin(socket.data.userData.id)
 }
 
 function quitFromGame({ gameId }, socket, io) {
@@ -110,7 +107,7 @@ function quitFromGame({ gameId }, socket, io) {
     let playerIndex = game.tableControl.players.findIndex(playerData => playerData.id == socket.data.userData.id)
     game.tableControl.players.splice(playerIndex, 1)
 
-    game.emitUpdateGame({ tableControl: game.tableControl })
+    game.playerLeave( socket.data.userData.id)
 }
 
 function FindGameInstanceById(gameId) {
