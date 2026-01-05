@@ -13,7 +13,7 @@ import deleteCharacter from "./characterFunctions/deleteCharacter";
 import EditCharacter from "./characterFunctions/createCharacter";
 import { deleteMapById, getAllUserMaps, SaveMap } from "./mapCreationFunctions/mapDataBaseFunctions";
 import getAssetsList from "./mapCreationFunctions/getAssetsList";
-import { startSocket } from "./socket";
+import { startSocket } from "./socket/server";
 import type { Server as httpServer } from "http";
 import editItem from "./itemsFunctions/createItem";
 import { getAllUserItems, getItemById } from "./itemsFunctions/getItem";

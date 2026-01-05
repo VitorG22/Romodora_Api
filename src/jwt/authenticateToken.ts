@@ -5,6 +5,7 @@ export default function authenticateTokenMiddleware(req: Request, res: Response,
     const authHeader = req.headers['authorization']
     const token = authHeader && authHeader.split(' ')[1]
 
+    console.log(token)
     if (token == null || !process.env.ACCESS_TOKEN_SECRET) return res.sendStatus(401)
 
     jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err: Error | null, user: any) => {

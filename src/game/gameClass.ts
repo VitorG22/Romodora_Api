@@ -1,4 +1,5 @@
 import type { Server } from "socket.io";
+import generateRandomCode from "../scripts/randomCode";
 
 interface IGame {
     users: Array<{
@@ -89,7 +90,19 @@ interface ICharacter {
     maxLife: number,
     position: { x: number, y: number }
     lastPosition: { x: number, y: number }
-
+    inventory: Array<{
+        id: string
+        subSelectionId?: string
+        name: string
+        picture?: string
+        amount: number
+        maxStack: number
+        rarity: "Common" | "Uncommon" | "Rare" | "Very Rare" | "Legendary"
+        price: number
+        description: string
+        weight: number
+        type: "meleeWeapon" | "rangedWeapon" | "armor" | "shield" | "tool" | "ammo" | "kit" | "accessories" | "consumable" | "catalysts" | "bag" | "materials"
+    }>
 }
 
 export default class Game {
@@ -191,6 +204,10 @@ export default class Game {
         if (!playerOwner) return
         if (this.hostData.id != userId && playerOwner.id != userId) return
 
+        if (newCharacterData.inventory) {
+            newCharacterData.inventory.forEach(item => item.subSelectionId = item.subSelectionId || generateRandomCode(32))
+        }
+
         playerOwner.character = { ...playerOwner.character, ...newCharacterData }
 
         this.emitUpdateTable({
@@ -242,5 +259,32 @@ export default class Game {
             type: "system",
             message: `${userData.name} roll ${randomValue} in D${DiceValue}`
         })
+    }
+
+    getEntityById(EntityId: string) {
+        let EntityToReturn = undefined
+
+        this.tableControl.players.forEach(playerData => {
+            if (playerData.character?.id == EntityId) {
+                EntityToReturn = playerData.character!
+            }
+        })
+
+        return EntityToReturn
+    }
+
+    getItemById(ItemSubSelectionId: string) {
+        let itemToReturn:any;
+
+        for (let playerData of this.tableControl.players) {
+            playerData.character?.inventory.forEach(itemData => {
+                if (itemData.subSelectionId == ItemSubSelectionId) {
+                    itemToReturn = itemData
+                }
+            })
+        }
+
+
+        return itemToReturn
     }
 }
