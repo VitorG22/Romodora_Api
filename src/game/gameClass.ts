@@ -18,6 +18,8 @@ interface IGame {
     }
     name: string
     io: Server
+    password: string | undefined
+    onlyFriends: boolean
 }
 
 
@@ -106,7 +108,7 @@ interface ICharacter {
 }
 
 export default class Game {
-    users; lobbyId; hostData; name; emitUpdateGame; emitUpdateTable; emitAction; playerJoin; playerLeave;
+    users; lobbyId; hostData; name; onlyFriends; password?; emitUpdateGame; emitUpdateTable; emitAction; playerJoin; playerLeave; 
     chat: Array<{
         ownerData: {
             id: string,
@@ -117,11 +119,13 @@ export default class Game {
     }> = [];
     tableControl: ITableControl
 
-    constructor({ io, name, users, lobbyId, hostData }: IGame) {
+    constructor({ io, name, users, lobbyId, hostData, onlyFriends, password }: IGame) {
         this.hostData = hostData
+        this.onlyFriends = onlyFriends
         this.users = users
         this.lobbyId = lobbyId
         this.name = name
+        this.password = password
         this.tableControl = {
             lobbyId: lobbyId,
             players: [],

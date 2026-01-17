@@ -1,6 +1,7 @@
 import type { Socket } from "socket.io";
 import { Server } from 'socket.io'
 import { FindGameInstanceById, getActiveGames, hostGame, joinInGame, quitFromGame } from "../game/functions";
+import hashPassword from "../scripts/hashPassword";
 
 export default function startLobbySocket(io: Server){
     io.on('connection', (socket: Socket) => {
@@ -20,8 +21,10 @@ export default function startLobbySocket(io: Server){
         })
 
         socket.on('joinInGame', (payload, callback) => {
+            console.log(payload)
             joinInGame({
                 gameId: payload.gameId,
+                password: payload.password ? hashPassword(payload.password):undefined ,
                 socket: socket,
                 callback: callback
             })
