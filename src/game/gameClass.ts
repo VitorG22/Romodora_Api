@@ -1,5 +1,6 @@
 import type { Server } from "socket.io";
 import generateRandomCode from "../scripts/randomCode";
+import { Character, type ICharacter, type TEntity } from "./entity/entityclass";
 
 interface IGame {
     users: Array<{
@@ -31,7 +32,7 @@ interface ITableControl {
         id: string,
         picture: string,
         color: string
-        character?: ICharacter
+        character?: Character
     }>,
     tableMap: ITableMap | undefined
 };
@@ -71,44 +72,8 @@ export interface ILayer {
     }
 }
 
-interface ICharacter {
-    name: string,
-    id: string,
-    picture: string,
-    class?: string,
-    subClass?: string,
-    race?: string,
-    subRace?: string,
-    attributes?: {
-        strength: number,
-        dexterity: number,
-        constitution: number,
-        intelligence: number,
-        wisdom: number,
-        charisma: number,
-    }
-    level?: number,
-    life: number,
-    maxLife: number,
-    position: { x: number, y: number }
-    lastPosition: { x: number, y: number }
-    inventory: Array<{
-        id: string
-        subSelectionId?: string
-        name: string
-        picture?: string
-        amount: number
-        maxStack: number
-        rarity: "Common" | "Uncommon" | "Rare" | "Very Rare" | "Legendary"
-        price: number
-        description: string
-        weight: number
-        type: "meleeWeapon" | "rangedWeapon" | "armor" | "shield" | "tool" | "ammo" | "kit" | "accessories" | "consumable" | "catalysts" | "bag" | "materials"
-    }>
-}
-
 export default class Game {
-    users; lobbyId; hostData; name; onlyFriends; password?; emitUpdateGame; emitUpdateTable; emitAction; playerJoin; playerLeave; 
+    users; lobbyId; hostData; name; onlyFriends; password?; emitUpdateGame; emitUpdateTable; emitAction; playerJoin; playerLeave;
     chat: Array<{
         ownerData: {
             id: string,
@@ -182,7 +147,7 @@ export default class Game {
             id: string,
             picture: string,
             color: string
-            character?: ICharacter
+            character?: Character
         }
     }) {
         let playerIndex = this.tableControl.players.findIndex(playerData => playerData.id == userId)
@@ -203,7 +168,7 @@ export default class Game {
 
     }
 
-    changePlayerCharacterData({ newCharacterData, characterOwnerId, userId }: { newCharacterData: ICharacter, characterOwnerId: string, userId: string }) {
+    changePlayerSelectedCharacter({ newCharacterData, characterOwnerId, userId }: { newCharacterData: ICharacter, characterOwnerId: string, userId: string }) {
         let playerOwner = this.tableControl.players.find(playerData => playerData.id == characterOwnerId)
         if (!playerOwner) return
         if (this.hostData.id != userId && playerOwner.id != userId) return
@@ -212,7 +177,15 @@ export default class Game {
             newCharacterData.inventory.forEach(item => item.subSelectionId = item.subSelectionId || generateRandomCode(32))
         }
 
-        playerOwner.character = { ...playerOwner.character, ...newCharacterData }
+        playerOwner.character = new Character({
+            ...newCharacterData, emitChange: (characterData: TEntity) => this.emitUpdateTable({
+                TypeToChange: "character",
+                data: {
+                    userId: playerOwner.id,
+                    characterData: characterData
+                }
+            })
+        })
 
         this.emitUpdateTable({
             TypeToChange: "character",
@@ -278,7 +251,7 @@ export default class Game {
     }
 
     getItemById(ItemSubSelectionId: string) {
-        let itemToReturn:any;
+        let itemToReturn: any;
 
         for (let playerData of this.tableControl.players) {
             playerData.character?.inventory.forEach(itemData => {

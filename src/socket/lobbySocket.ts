@@ -40,6 +40,7 @@ export default function startLobbySocket(io: Server){
         socket.on('changePlayerData', (payload) => {
             let game = FindGameInstanceById({ gameId: payload.gameId })
             if (game == null) return
+            console.log("teste_123")
             game.changePlayerData({
                 newPlayerData: payload.newPlayerData,
                 userId: socket.data.userData.id,
